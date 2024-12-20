@@ -10,6 +10,11 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install pdo_mysql mbstring zip \
     && rm -rf /var/lib/apt/lists/*
 
+# Node.jsのセットアップ
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && npm install -g npm@11.0.0
+
 # Composerインストール
 COPY --from=composer:2.5 /usr/bin/composer /usr/bin/composer
 
