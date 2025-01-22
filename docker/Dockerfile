@@ -1,27 +1,25 @@
-FROM php:8.1-fpm
+# ベースイメージ
+FROM php:8.1-cli
 
-# PHP拡張インストール例
+# 必要なパッケージのインストール
 RUN apt-get update && apt-get install -y \
-    libonig-dev \
+    curl \
+    git \
+    unzip \
     libzip-dev \
     zip \
-    unzip \
-    nginx \
-    && docker-php-ext-install pdo_mysql mbstring zip \
-    && rm -rf /var/lib/apt/lists/*
+    nodejs \
+    npm
 
-# Node.jsのセットアップ
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs \
-    && npm install -g npm@11.0.0
+# PHP拡張モジュールのインストール
+RUN docker-php-ext-install pdo_mysql zip
 
-# Composerインストール
-COPY --from=composer:2.5 /usr/bin/composer /usr/bin/composer
+# Composerのインストール
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-WORKDIR /var/www/html
+# 作業ディレクトリを設定
+WORKDIR /workspace
 
-# Nginx設定などは適宜行う
-# ここでlaravel-chat公開ディレクトリをNginxのrootに設定するなどの設定ファイルが必要。
-# 例: COPY ./nginx.conf /etc/nginx/conf.d/default.conf
-
-CMD service nginx start && php-fpm
+# パーミッション設定
+RUN useradd -ms /bin/bash remoteUser
+USER remoteUser

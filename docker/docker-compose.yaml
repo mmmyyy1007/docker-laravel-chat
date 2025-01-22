@@ -1,26 +1,34 @@
 services:
-  laravel-chat-app:
+  app:
     build:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - ../laravel:/var/www/html  # Laravelプロジェクトのパス
+      - ../laravel-chat:/workspace/laravel-chat
     ports:
-      - 8080:80
-    depends_on:
-      - mysql-db
+      - "8000:8000"
+    working_dir: /workspace
+    # command: bash -c "php artisan serve --host=0.0.0.0 --port=8000"
+    command: bash -c "while true; do sleep 30; done"
 
-  mysql-db:
+  mysql:
     image: mysql:8.0
+    container_name: laravel-chat-mysql
     environment:
+      MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: laravel
       MYSQL_USER: laravel
       MYSQL_PASSWORD: secret
-      MYSQL_ROOT_PASSWORD: root
-    volumes:
-      - mysql-db-data:/var/lib/mysql
     ports:
-      - 3307:3306
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  redis:
+    image: redis:alpine
+    container_name: laravel-chat-redis
+    ports:
+      - "6379:6379"
 
 volumes:
-  mysql-db-data:
+  mysql-data:
